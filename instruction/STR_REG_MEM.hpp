@@ -4,10 +4,10 @@
 #include <string>
 
 struct STR_REG_MEM {
-  int reg_addr;
+  int target;
   std::string str() const {
     std::stringstream ss;
-    ss << "STR_REG_MEM[" << reg_addr << "]";
+    ss << "STR_REG_MEM[" << target << "]";
     return ss.str();
   }
 };

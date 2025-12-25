@@ -4,10 +4,10 @@
 #include <string>
 
 struct BCD_STORE {
-  int reg_addr;
+  int target;
   std::string str() const {
     std::stringstream ss;
-    ss << "BCD_STORE[" << reg_addr << "]";
+    ss << "BCD_STORE[" << target << "]";
     return ss.str();
   }
 };

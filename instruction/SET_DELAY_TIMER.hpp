@@ -4,10 +4,10 @@
 #include <string>
 
 struct SET_DELAY_TIMER {
-  int reg_addr;
+  int target;
   std::string str() const {
     std::stringstream ss;
-    ss << "SET_DELAY_TIMER" << reg_addr << "]";
+    ss << "SET_DELAY_TIMER" << target << "]";
     return ss.str();
   }
 };

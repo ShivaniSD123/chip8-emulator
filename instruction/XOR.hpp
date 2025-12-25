@@ -4,11 +4,11 @@
 #include <string>
 
 struct XOR {
-  int reg1_addr;
-  int reg2_addr;
+  int first_register;
+  int second_register;
   std::string str() const {
     std::stringstream ss;
-    ss << "XOR[" << reg1_addr << " " << reg2_addr << "]";
+    ss << "XOR[" << first_register << " " << second_register << "]";
     return ss.str();
   }
 };

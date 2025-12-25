@@ -1,5 +1,10 @@
 #pragma once
 
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <variant>
+
 #include "ADD.hpp"
 #include "AND.hpp"
 #include "BCD_STORE.hpp"
@@ -35,11 +40,6 @@
 #include "WT_KEY_PRESS.hpp"
 #include "XOR.hpp"
 
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <variant>
-
 struct Instruction
     : public std::variant<
           Return, CLS, Unknown, JMP_ADDR, CALL_SUB, JMP_REG, SKP_IF_EQUALS,
@@ -54,8 +54,6 @@ struct Instruction
 };
 
 Instruction parse_instruction_bits(uint16_t bits) {
-  std::cout << std::hex << std::setw(4) << std::setfill('0') << bits
-            << std::endl;
   if (bits == 0x00ee)
     return Instruction{Return{}};
   else if (bits == 0x00e0)

@@ -4,10 +4,10 @@
 #include <string>
 
 struct WT_KEY_PRESS {
-  int reg_addr;
+  int target;
   std::string str() const {
     std::stringstream ss;
-    ss << "WT_KEY_PRESS" << reg_addr << "]";
+    ss << "WT_KEY_PRESS" << target << "]";
     return ss.str();
   }
 };

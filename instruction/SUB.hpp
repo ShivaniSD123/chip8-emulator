@@ -4,11 +4,11 @@
 #include <string>
 
 struct SUB {
-  int reg1_addr;
-  int reg2_addr;
+  int first_register;
+  int second_register;
   std::string str() const {
     std::stringstream ss;
-    ss << "SUB[" << reg1_addr << " " << reg2_addr << "]";
+    ss << "SUB[" << first_register << " " << second_register << "]";
     return ss.str();
   }
 };

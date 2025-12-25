@@ -25,9 +25,8 @@ int main(int argc, char* argv[]) {
 
   auto program = parseROM(filename);
   Interpreter vm(std::move(program));
-  while (true) {
-    bool is_running = vm.step();
-    if (!is_running) break;
+  while (vm.is_running() == true) {
+    vm.step();
   }
   return 0;
 }

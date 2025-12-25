@@ -4,11 +4,11 @@
 #include <string>
 
 struct SKP_NOT_EQUALS {
-  int reg_addr;
+  int target;
   int val;
   std::string str() const {
     std::stringstream ss;
-    ss << "SKP_NOT_EQUALS[" << reg_addr << " " << val << "]";
+    ss << "SKP_NOT_EQUALS[" << target << " " << val << "]";
     return ss.str();
   }
 };

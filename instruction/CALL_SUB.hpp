@@ -4,10 +4,10 @@
 #include <string>
 
 struct CALL_SUB {
-  int addr;
+  int address;
   std::string str() const {
     std::stringstream ss;
-    ss << "CALL_SUB[" << addr << "]";
+    ss << "CALL_SUB[" << address << "]";
     return ss.str();
   }
 };

@@ -4,10 +4,10 @@
 #include <string>
 
 struct JMP_ADDR {
-  int addr;
+  int address;
   std::string str() const {
     std::stringstream ss;
-    ss << "JMP_ADDR[" << addr << "]";
+    ss << "JMP_ADDR[" << address << "]";
     return ss.str();
   }
 };

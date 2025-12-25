@@ -4,11 +4,11 @@
 #include <string>
 
 struct SHL {
-  int reg1_addr;
-  int reg2_addr;
+  int first_register;
+  int second_register;
   std::string str() const {
     std::stringstream ss;
-    ss << "SHL[" << reg1_addr << " " << reg2_addr << "]";
+    ss << "SHL[" << first_register << " " << second_register << "]";
     return ss.str();
   }
 };

@@ -4,10 +4,10 @@
 #include <string>
 
 struct FT_SPT_ADDR {
-  int reg_addr;
+  int target;
   std::string str() const {
     std::stringstream ss;
-    ss << "FT_SPT_ADDR[" << reg_addr << "]";
+    ss << "FT_SPT_ADDR[" << target << "]";
     return ss.str();
   }
 };
