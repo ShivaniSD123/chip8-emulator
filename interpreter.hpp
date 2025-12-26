@@ -9,14 +9,17 @@
 class Interpreter {
   Program program;
   bool is_running_;
-  int pc;
+  struct code_pointer {
+    int raw_address;
+  };
+  code_pointer pc;
   std::vector<int> video_buffer;
-  std::stack<int> stack;
+  std::stack<code_pointer> stack;
   std::vector<int> registers;
 
  public:
   Interpreter(Program p)
-      : program(std::move(p)), pc(0), video_buffer(64, 0), registers(16, -1) {
+      : program(std::move(p)), pc({0}), video_buffer(64, 0), registers(16, -1) {
     is_running_ = true;
   }
   struct instruction_executor {
@@ -28,22 +31,19 @@ class Interpreter {
     void operator()(Return x) {
       precondition(!self.stack.empty(),
                    "Return should not be called without calling a function");
-      int address = self.stack.top();
+      auto returnAddress = self.stack.top();
       self.stack.pop();
-      self.pc = address;
+      self.pc = returnAddress;
     }
 
-    void operator()(JMP_ADDR x) { self.pc = self.toCodePointer(x.address); }
+    void operator()(JMP_ADDR x) { self.pc = {x.address}; }
 
     void operator()(CALL_SUB x) {
       self.stack.push(self.pc);
-      self.pc = x.address;
+      self.pc = {x.address};
     }
 
-    void operator()(JMP_REG x) {
-      int index = x.address + self.registers[0];
-      self.pc = index;
-    }
+    void operator()(JMP_REG x) { self.pc = {x.address + self.registers[0]}; }
 
     void operator()(SKP_IF_EQUALS x) {
       if (self.registers[x.target] == x.val) self.advance_program_counter();
@@ -128,10 +128,12 @@ class Interpreter {
 
  private:
   /// The current instruction.
-  Instruction current_instruction() { return program.instruction_at(pc); }
+  Instruction current_instruction() {
+    return program.instruction_at(pc.raw_address - 0x200);
+  }
 
   /// Advances the program counter to next instruction.
-  void advance_program_counter() { pc += 2; }
+  void advance_program_counter() { pc.raw_address += 2; }
 
   void execute(Instruction i) {
     std::visit(overloaded{
@@ -141,6 +143,4 @@ class Interpreter {
                i);
     std::visit(instruction_executor{*this}, i);
   }
-
-  int toCodePointer(int address) { return address - 0x200; }
 };
