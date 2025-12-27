@@ -9,7 +9,8 @@ Program parseROM(std::string const filename) {
   std::ifstream f(filename, std::ios::in | std::ios::binary);
   while (true) {
     uint8_t byte;
-    if (!f.read(reinterpret_cast<char*>(&byte), 1)) break;
+    if (!f.read(reinterpret_cast<char*>(&byte), 1))
+      break;
     bytes.push_back(byte);
   }
   return {bytes};

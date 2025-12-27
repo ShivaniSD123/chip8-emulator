@@ -15,9 +15,11 @@ class Interpreter {
   Program program;
   Font font;
   bool is_running_;
+
   struct code_pointer {
     int raw_address;
   };
+
   std::vector<uint8_t> ram;
   code_pointer pc;
 
@@ -41,7 +43,8 @@ class Interpreter {
   }
 
  public:
-  std::vector<std::vector<int> > video_buffer;
+  std::vector<std::vector<int>> video_buffer;
+
   Interpreter(Program p, Font f)
       : program(std::move(p)),
         font(std::move(f)),
@@ -58,8 +61,10 @@ class Interpreter {
 
   struct instruction_executor {
     Interpreter& self;
+
     void operator()(CLS x) {
-      for (auto& r : self.video_buffer) std::fill(r.begin(), r.end(), 0);
+      for (auto& r : self.video_buffer)
+        std::fill(r.begin(), r.end(), 0);
     }
 
     void operator()(Return x) {
@@ -80,11 +85,13 @@ class Interpreter {
     void operator()(JMP_REG x) { self.pc = {x.address + self.registers[0]}; }
 
     void operator()(SKP_IF_EQUALS x) {
-      if (self.registers[x.target] == x.val) self.advance_program_counter();
+      if (self.registers[x.target] == x.val)
+        self.advance_program_counter();
     }
 
     void operator()(SKP_NOT_EQUALS x) {
-      if (self.registers[x.target] != x.val) self.advance_program_counter();
+      if (self.registers[x.target] != x.val)
+        self.advance_program_counter();
     }
 
     void operator()(SKP_REG_EQUALS x) {
@@ -190,7 +197,8 @@ class Interpreter {
         uint8_t spirit = self.ram[self.index_register.raw_address + i];
         std::bitset<8> bits(spirit);
         for (int j = 0; j <= 7; j++) {
-          if (bits[7 - j] == 0) continue;
+          if (bits[7 - j] == 0)
+            continue;
           if (self.video_buffer[(x.second_register + i) % 32]
                                [(x.first_register + j) % 64] == 1)
             self.registers[15] = 1;
@@ -215,6 +223,7 @@ class Interpreter {
     void operator()(GET_DELAY_TIMER x) {
       self.registers[x.target_register] = self.random_u8();
     }
+
     template <typename T>
     void operator()(T) {}
 

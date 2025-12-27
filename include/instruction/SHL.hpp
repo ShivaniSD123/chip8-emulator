@@ -6,6 +6,7 @@
 struct SHL {
   int first_register;
   int second_register;
+
   std::string str() const {
     std::stringstream ss;
     ss << "SHL[" << first_register << " " << second_register << "]";

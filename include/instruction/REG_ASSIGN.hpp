@@ -6,6 +6,7 @@
 struct REG_ASSIGN {
   int to;
   int from;
+
   std::string str() const {
     std::stringstream ss;
     ss << "REG_ASSIGN[" << to << " " << from << "]";

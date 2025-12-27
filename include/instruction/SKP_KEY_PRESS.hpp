@@ -5,6 +5,7 @@
 
 struct SKP_KEY_PRESS {
   int target;
+
   std::string str() const {
     std::stringstream ss;
     ss << "SKP_KEY_PRESS" << target << "]";

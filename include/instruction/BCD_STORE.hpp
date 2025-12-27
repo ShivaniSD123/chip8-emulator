@@ -5,6 +5,7 @@
 
 struct BCD_STORE {
   int target;
+
   std::string str() const {
     std::stringstream ss;
     ss << "BCD_STORE[" << target << "]";

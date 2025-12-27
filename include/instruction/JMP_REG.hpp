@@ -5,6 +5,7 @@
 
 struct JMP_REG {
   int address;
+
   std::string str() const {
     std::stringstream ss;
     ss << "JMP_REG[" << address << "]";

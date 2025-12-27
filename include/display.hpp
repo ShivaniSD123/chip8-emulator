@@ -25,7 +25,7 @@ class Display {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   }
 
-  void draw_screen(std::vector<std::vector<int> >& video_buffer) {
+  void draw_screen(std::vector<std::vector<int>>& video_buffer) {
     // Clear screen (black)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);

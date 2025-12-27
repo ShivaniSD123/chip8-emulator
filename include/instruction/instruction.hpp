@@ -62,8 +62,10 @@ Instruction parse_instruction_bits(uint16_t bits) {
   uint16_t NNN = (bits & 0x0FFF);
 
   // ---- exact matches ----
-  if (bits == 0x00E0) return Instruction{CLS{}};
-  if (bits == 0x00EE) return Instruction{Return{}};
+  if (bits == 0x00E0)
+    return Instruction{CLS{}};
+  if (bits == 0x00EE)
+    return Instruction{Return{}};
 
   // ---- primary opcode group ----
   switch (bits & 0xF000) {
