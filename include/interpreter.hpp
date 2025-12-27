@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "common.hpp"
+#include "display.hpp"
 #include "font.hpp"
-#include "graphic_design.hpp"
 #include "instruction/instruction.hpp"
 #include "program.hpp"
 
@@ -18,10 +18,9 @@ class Interpreter {
   struct code_pointer {
     int raw_address;
   };
-  Display display;
   std::vector<uint8_t> ram;
   code_pointer pc;
-  std::vector<std::vector<int> > video_buffer;
+
   std::stack<code_pointer> stack;
   std::vector<int> registers;
   code_pointer index_register;
@@ -42,6 +41,7 @@ class Interpreter {
   }
 
  public:
+  std::vector<std::vector<int> > video_buffer;
   Interpreter(Program p, Font f)
       : program(std::move(p)),
         font(std::move(f)),
@@ -231,12 +231,7 @@ class Interpreter {
     Instruction i = current_instruction();
     advance_program_counter();
     execute(i);
-    // clear_screen();
-    // print_instruction(i);
-    // print_screen();
-    // std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    display.draw_screen(video_buffer);
-    display.add_delay();
+    print_instruction(i);
   }
 
  private:

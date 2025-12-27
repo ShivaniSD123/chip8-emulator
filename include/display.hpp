@@ -50,6 +50,16 @@ class Display {
 
   void add_delay() { SDL_Delay(16); }
 
+  bool process_events() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        return false;  // user closed window
+      }
+    }
+    return true;
+  }
+
   ~Display() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

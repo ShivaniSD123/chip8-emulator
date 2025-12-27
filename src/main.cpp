@@ -21,15 +21,13 @@ int main(int argc, char* argv[]) {
     cerr << "Usage: " << argv[0] << " <filename>\n";
     return 1;
   }
-
-  string filename = argv[1];
-
-  Font f;
-  auto program = parseROM(filename);
-  Interpreter vm(std::move(program), std::move(f));
-
+  Display d;
+  Interpreter vm(parseROM(argv[1]), Font{});
   while (vm.is_running() == true) {
+    if (!d.process_events()) {
+      break;
+    }
     vm.step();
+    d.draw_screen(vm.video_buffer);
   }
-  return 0;
 }
