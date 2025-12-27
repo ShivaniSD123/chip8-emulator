@@ -26,7 +26,6 @@ class Interpreter {
   std::stack<code_pointer> stack;
   std::vector<int> registers;
   code_pointer index_register;
-  std::ofstream log;
 
   /// Load ROM file in RAM
   void load_rom() {
@@ -51,8 +50,7 @@ class Interpreter {
         pc({0x200}),
         video_buffer(32, std::vector<int>(64, 0)),
         registers(16, 0),
-        ram(4096),
-        log("build/log.txt") {
+        ram(4096) {
     srand(time(NULL));
     is_running_ = true;
     load_rom();
@@ -278,14 +276,8 @@ class Interpreter {
   }
 
   void print_instruction(Instruction i) {
-    std::visit(
-        overloaded{
-            [&](auto x) {
-              std::cout << x.str() << std::endl;
-              log << x.str() << std::endl;
-            },
-        },
-        i);
+    std::visit(overloaded{[&](auto x) { std::cout << x.str() << std::endl; }},
+               i);
   }
 
   void clear_screen() const { system("clear"); }
