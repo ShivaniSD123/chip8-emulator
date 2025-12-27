@@ -5,9 +5,9 @@
 #include "instruction/instruction.hpp"
 
 class Program {
+ public:
   std::vector<uint8_t> bytes;
 
-public:
   Program(std::vector<uint8_t> bytes) : bytes(std::move(bytes)) {}
 
   Instruction instruction_at(int address) {

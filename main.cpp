@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "font.hpp"
 #include "interpreter.hpp"
 
 Program parseROM(std::string const filename) {
@@ -23,8 +24,10 @@ int main(int argc, char* argv[]) {
 
   string filename = argv[1];
 
+  Font f;
   auto program = parseROM(filename);
-  Interpreter vm(std::move(program));
+  Interpreter vm(std::move(program), std::move(f));
+
   while (vm.is_running() == true) {
     vm.step();
   }
