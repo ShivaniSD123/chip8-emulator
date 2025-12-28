@@ -242,8 +242,11 @@ class Interpreter {
       self.registers[x.target_register] = r & x.mask;
     }
 
-    template <typename T>
-    void operator()(T) {}
+    void operator()(SET_DELAY_TIMER) {}
+
+    void operator()(SET_SOUND_TIMER) {}
+
+    void operator()(NOP) {}
 
     void operator()(Unknown x) {
       precondition_failure("Unknown instruction[" + x.str() +
