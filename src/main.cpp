@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "display.hpp"
 #include "font.hpp"
 #include "interpreter.hpp"
 
@@ -25,10 +26,13 @@ int main(int argc, char* argv[]) {
   Display d;
   Interpreter vm(parseROM(argv[1]), Font{});
   while (vm.is_running() == true) {
-    if (!d.process_events()) {
+    if (!d.process_events(vm.keypad)) {
       break;
     }
-    vm.step();
+    for (int i = 0; i < 10; i++) {
+      vm.step();
+    }
     d.draw_screen(vm.video_buffer);
+    d.add_delay();
   }
 }

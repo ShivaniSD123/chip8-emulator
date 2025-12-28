@@ -1,12 +1,12 @@
 #pragma once
 
+#include <array>
 #include <bitset>
 #include <random>
 #include <thread>
 #include <vector>
 
 #include "common.hpp"
-#include "display.hpp"
 #include "font.hpp"
 #include "instruction/instruction.hpp"
 #include "program.hpp"
@@ -43,6 +43,7 @@ class Interpreter {
 
  public:
   std::vector<std::vector<int>> video_buffer;
+  std::array<bool, 16> keypad;
 
   Interpreter(Program p, Font f)
       : program(std::move(p)),
@@ -55,6 +56,7 @@ class Interpreter {
     is_running_ = true;
     load_rom();
     load_font();
+    std::fill(keypad.begin(), keypad.end(), 0);
   }
 
   struct instruction_executor {
@@ -197,29 +199,41 @@ class Interpreter {
         for (int j = 0; j <= 7; j++) {
           if (bits[7 - j] == 0)
             continue;
-          if (self.video_buffer[(x.second_register + i) % 32]
-                               [(x.first_register + j) % 64] == 1)
+          if (self.video_buffer[(self.registers[x.second_register] + i) % 32]
+                               [(self.registers[x.first_register] + j) % 64] ==
+              1)
             self.registers[15] = 1;
-          self.video_buffer[(x.second_register + i) % 32]
-                           [(x.first_register + j) % 64] ^= 1;
+          self.video_buffer[(self.registers[x.second_register] + i) % 32]
+                           [(self.registers[x.first_register] + j) % 64] ^= 1;
         }
       }
     }
 
-    void operator()(SKP_KEY_NOT_PRESS) {
-      if (!self.random_bool()) {
+    void operator()(SKP_KEY_NOT_PRESS x) {
+      if (!self.keypad[self.registers[x.target]])
         self.advance_program_counter();
-      }
     }
 
-    void operator()(SKP_KEY_PRESS) {
-      if (self.random_bool()) {
+    void operator()(SKP_KEY_PRESS x) {
+      if (self.keypad[self.registers[x.target]])
         self.advance_program_counter();
-      }
     }
 
     void operator()(GET_DELAY_TIMER x) {
       self.registers[x.target_register] = self.random_u8();
+    }
+
+    void operator()(WT_KEY_PRESS x) {
+      bool pressed = false;
+      for (int i = 0; i < 16; i++) {
+        if (self.keypad[i]) {
+          pressed = true;
+          self.registers[x.target] = i;
+          break;
+        }
+      }
+      if (!pressed)
+        self.pc.raw_address -= 2;
     }
 
     template <typename T>

@@ -3,14 +3,17 @@
 
 #include <vector>
 
+#include <key_map.hpp>
+
 class Display {
  private:
   SDL_Window* window;
   SDL_Renderer* renderer;
-  int scale;
+  int SCALE;
+  Key_Map x;
 
  public:
-  Display() : scale(10) {
+  Display() : SCALE(10) {
     // Initializing SDL
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -50,11 +53,17 @@ class Display {
 
   void add_delay() { SDL_Delay(16); }
 
-  bool process_events() {
+  bool process_events(std::array<bool, 16>& keypad) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
         return false;  // user closed window
+      }
+      if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+        int key = x.map_key(event.key.keysym.sym);
+        if (key != -1) {
+          keypad[key] = (event.type == SDL_KEYDOWN);
+        }
       }
     }
     return true;
