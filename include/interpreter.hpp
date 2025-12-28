@@ -49,6 +49,7 @@ class Interpreter {
         video_buffer(32, std::vector<int>(64, 0)),
         registers(16, 0),
         ram(4096) {
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
     load_rom();
     load_font();
     std::fill(keypad.begin(), keypad.end(), false);
@@ -236,11 +237,17 @@ class Interpreter {
         self.pc.raw_address -= 2;
     }
 
+    void operator()(RAND x) {
+      uint8_t r = std::rand() & 0xFF;
+      self.registers[x.target_register] = r & x.mask;
+    }
+
     template <typename T>
     void operator()(T) {}
 
-    void operator()(Unknown) {
-      precondition_failure("Unknown instruction should not be reachable!");
+    void operator()(Unknown x) {
+      precondition_failure("Unknown instruction[" + x.str() +
+                           "] should not be reachable!");
     }
   };
 

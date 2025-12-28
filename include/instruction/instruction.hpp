@@ -18,7 +18,9 @@
 #include "JMP_ADDR.hpp"
 #include "JMP_REG.hpp"
 #include "LD_REG_MEM.hpp"
+#include "NOP.hpp"
 #include "OR.hpp"
+#include "RAND.hpp"
 #include "REG_ASSIGN.hpp"
 #include "REG_VAL_ASSIGN.hpp"
 #include "REG_VAL_INC.hpp"
@@ -47,14 +49,13 @@ struct Instruction
           REG_VAL_INC, REG_ASSIGN, OR, AND, XOR, ADD, SUB, SHR, SUBN, SHL,
           IND_ASSIGN, IND_INC, FT_SPT_ADDR, BCD_STORE, STR_REG_MEM, LD_REG_MEM,
           DRW_SPRITE, SKP_KEY_PRESS, SKP_KEY_NOT_PRESS, GET_DELAY_TIMER,
-          WT_KEY_PRESS, SET_DELAY_TIMER, SET_SOUND_TIMER> {
+          WT_KEY_PRESS, SET_DELAY_TIMER, SET_SOUND_TIMER, NOP, RAND> {
   std::string str() const {
     return std::visit([](auto r) { return r.str(); }, *this);
   }
 };
 
 Instruction parse_instruction_bits(uint16_t bits) {
-  // ---- extract common fields ----
   uint8_t X = (bits & 0x0F00) >> 8;
   uint8_t Y = (bits & 0x00F0) >> 4;
   uint8_t N = (bits & 0x000F);
@@ -85,13 +86,18 @@ Instruction parse_instruction_bits(uint16_t bits) {
       return Instruction{IND_ASSIGN{.address = NNN}};
     case 0xB000:
       return Instruction{JMP_REG{.address = NNN}};
+    case 0xC000:
+      return Instruction{RAND{.target_register = X, .mask = NN}};
     case 0xD000:
       return Instruction{
           DRW_SPRITE{.x_register = X, .y_register = Y, .val = N}};
   }
 
-  // ---- arithmetic / logic ----
+  // ---- arithmetic / logic / register skip ----
   switch (bits & 0xF00F) {
+    case 0x5000:
+      return Instruction{
+          SKP_REG_EQUALS{.first_register = X, .second_register = Y}};
     case 0x8000:
       return Instruction{REG_ASSIGN{.to_register = X, .from_register = Y}};
     case 0x8001:
@@ -136,11 +142,15 @@ Instruction parse_instruction_bits(uint16_t bits) {
     case 0xF033:
       return Instruction{BCD_STORE{.target_register = X}};
     case 0xF055:
-      return Instruction{STR_REG_MEM{X}};
+      return Instruction{STR_REG_MEM{.target_register = X}};
     case 0xF065:
       return Instruction{LD_REG_MEM{.until_register = X}};
   }
 
-  // ---- unknown / SYS ----
+  // ---- SYS (0NNN) treated as NOP ----
+  if ((bits & 0xF000) == 0x0000) {
+    return Instruction{NOP{}};
+  }
+
   return Instruction{Unknown{bits}};
 }
