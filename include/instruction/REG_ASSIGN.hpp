@@ -4,12 +4,12 @@
 #include <string>
 
 struct REG_ASSIGN {
-  int to;
-  int from;
+  int to_register;
+  int from_register;
 
   std::string str() const {
     std::stringstream ss;
-    ss << "REG_ASSIGN[" << to << " " << from << "]";
+    ss << "REG_ASSIGN[" << to_register << " " << from_register << "]";
     return ss.str();
   }
 };

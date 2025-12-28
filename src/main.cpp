@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
   }
   Display d;
   Interpreter vm(parseROM(argv[1]), Font{});
-  while (vm.is_running() == true) {
+  while (true) {
     if (!d.process_events(vm.keypad)) {
       break;
     }
@@ -33,6 +33,5 @@ int main(int argc, char* argv[]) {
       vm.step();
     }
     d.draw_screen(vm.video_buffer);
-    d.add_delay();
   }
 }

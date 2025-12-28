@@ -2,8 +2,6 @@
 
 #include <array>
 #include <bitset>
-#include <random>
-#include <thread>
 #include <vector>
 
 #include "common.hpp"
@@ -14,7 +12,6 @@
 class Interpreter {
   Program program;
   Font font;
-  bool is_running_;
 
   struct code_pointer {
     int raw_address;
@@ -52,11 +49,9 @@ class Interpreter {
         video_buffer(32, std::vector<int>(64, 0)),
         registers(16, 0),
         ram(4096) {
-    srand(time(NULL));
-    is_running_ = true;
     load_rom();
     load_font();
-    std::fill(keypad.begin(), keypad.end(), 0);
+    std::fill(keypad.begin(), keypad.end(), false);
   }
 
   struct instruction_executor {
@@ -85,12 +80,12 @@ class Interpreter {
     void operator()(JMP_REG x) { self.pc = {x.address + self.registers[0]}; }
 
     void operator()(SKP_IF_EQUALS x) {
-      if (self.registers[x.target] == x.val)
+      if (self.registers[x.target_register] == x.val)
         self.advance_program_counter();
     }
 
     void operator()(SKP_NOT_EQUALS x) {
-      if (self.registers[x.target] != x.val)
+      if (self.registers[x.target_register] != x.val)
         self.advance_program_counter();
     }
 
@@ -108,15 +103,17 @@ class Interpreter {
         self.advance_program_counter();
     }
 
-    void operator()(REG_VAL_ASSIGN x) { self.registers[x.target] = x.val; }
+    void operator()(REG_VAL_ASSIGN x) {
+      self.registers[x.target_register] = x.val;
+    }
 
     void operator()(REG_VAL_INC x) {
-      int address = x.target;
+      int address = x.target_register;
       self.registers[address] += x.val;
     }
 
     void operator()(REG_ASSIGN x) {
-      self.registers[x.to] = self.registers[x.from];
+      self.registers[x.to_register] = self.registers[x.from_register];
     }
 
     void operator()(OR x) {
@@ -135,27 +132,21 @@ class Interpreter {
       int r1 = x.first_register;
       int r2 = x.second_register;
       int sum = self.registers[r1] + self.registers[r2];
-      if (sum > 256)
-        self.registers[15] = 1;
-      else
-        self.registers[15] = 0;
-      self.registers[r1] = sum & 0x00ff;
+      self.registers[15] = (sum > 255);
+      self.registers[r1] = sum & 0xFF;
     }
 
     void operator()(SUB x) {
       int r1 = x.first_register;
       int r2 = x.second_register;
       int sub = self.registers[r1] - self.registers[r2];
-      if (self.registers[r1] > self.registers[r2])
-        self.registers[15] = 1;
-      else
-        self.registers[15] = 0;
-      self.registers[r1] = sub;
+      self.registers[15] = (self.registers[r1] >= self.registers[r2]);
+      self.registers[r1] = sub & 0xFF;
     }
 
     void operator()(SHR x) {
-      self.registers[15] = self.registers[x.first_register] & 0x0001;
-      self.registers[x.first_register] >>= 1;
+      self.registers[15] = self.registers[x.target_register] & 0x0001;
+      self.registers[x.target_register] >>= 1;
     }
 
     void operator()(SUBN x) {
@@ -166,61 +157,69 @@ class Interpreter {
     }
 
     void operator()(SHL x) {
-      self.registers[15] = self.registers[x.first_register] & 0x0080;
-      self.registers[x.first_register] <<= 1;
+      self.registers[15] = (self.registers[x.target_register] & 0x80) >> 7;
+      self.registers[x.target_register] <<= 1;
     }
 
-    void operator()(IND_ASSIGN x) { self.index_register = {x.ind_addr}; }
+    void operator()(IND_ASSIGN x) { self.index_register = {x.address}; }
 
     void operator()(IND_INC x) {
-      self.index_register = {x.target + self.index_register.raw_address};
+      self.index_register = {self.index_register.raw_address +
+                             self.registers[x.target_register]};
     }
 
-    void operator()(FT_SPT_ADDR x) { self.index_register = {x.target}; }
+    void operator()(FT_SPT_ADDR x) {
+      self.index_register = {0x050 + self.registers[x.target_register] * 5};
+    }
 
-    void operator()(BCD_STORE x) { self.storeBCD(x.target); }
+    void operator()(BCD_STORE x) { self.storeBCD(x.target_register); }
 
     void operator()(STR_REG_MEM x) {
-      for (int i = 0; i <= x.target; i++) {
+      for (int i = 0; i <= x.target_register; i++) {
         self.ram[self.index_register.raw_address + i] = self.registers[i];
       }
     }
 
     void operator()(LD_REG_MEM x) {
-      for (int i = 0; i <= x.target; i++) {
+      for (int i = 0; i <= x.until_register; i++) {
         self.registers[i] = self.ram[self.index_register.raw_address + i];
       }
     }
 
     void operator()(DRW_SPRITE x) {
+      self.registers[15] = 0;
+
       for (int i = 0; i < x.val; i++) {
-        uint8_t spirit = self.ram[self.index_register.raw_address + i];
-        std::bitset<8> bits(spirit);
-        for (int j = 0; j <= 7; j++) {
-          if (bits[7 - j] == 0)
+        uint8_t sprite = self.ram[self.index_register.raw_address + i];
+        std::bitset<8> bits(sprite);
+
+        for (int j = 0; j < 8; j++) {
+          if (!bits[7 - j])
             continue;
-          if (self.video_buffer[(self.registers[x.second_register] + i) % 32]
-                               [(self.registers[x.first_register] + j) % 64] ==
-              1)
+
+          int y = (self.registers[x.y_register] + i) % 32;
+          int xcoord = (self.registers[x.x_register] + j) % 64;
+
+          if (self.video_buffer[y][xcoord])
             self.registers[15] = 1;
-          self.video_buffer[(self.registers[x.second_register] + i) % 32]
-                           [(self.registers[x.first_register] + j) % 64] ^= 1;
+
+          self.video_buffer[y][xcoord] ^= 1;
         }
       }
     }
 
     void operator()(SKP_KEY_NOT_PRESS x) {
-      if (!self.keypad[self.registers[x.target]])
+      if (!self.keypad[self.registers[x.target_register]])
         self.advance_program_counter();
     }
 
     void operator()(SKP_KEY_PRESS x) {
-      if (self.keypad[self.registers[x.target]])
+      if (self.keypad[self.registers[x.target_register]])
         self.advance_program_counter();
     }
 
     void operator()(GET_DELAY_TIMER x) {
-      self.registers[x.target_register] = self.random_u8();
+      self.registers[x.target_register] = 0;
     }
 
     void operator()(WT_KEY_PRESS x) {
@@ -228,7 +227,8 @@ class Interpreter {
       for (int i = 0; i < 16; i++) {
         if (self.keypad[i]) {
           pressed = true;
-          self.registers[x.target] = i;
+          self.registers[x.target_register] = i;
+          std::fill(std::begin(self.keypad), std::end(self.keypad), false);
           break;
         }
       }
@@ -240,12 +240,9 @@ class Interpreter {
     void operator()(T) {}
 
     void operator()(Unknown) {
-      precondition("Unknown instruction should not be reachable!");
+      precondition_failure("Unknown instruction should not be reachable!");
     }
   };
-
-  /// Returns true if program is running
-  bool is_running() const { return is_running_; }
 
   /// Executes the next instruction of program.
   void step() {
@@ -277,18 +274,6 @@ class Interpreter {
     ram[index_register.raw_address + 2] = x % 10;
   }
 
-  void print_screen() const {
-    for (int i = 0; i < 32; ++i) {
-      for (int j = 0; j < 64; ++j) {
-        if (video_buffer[i][j])
-          std::cout << "█";
-        else
-          std::cout << " ";
-      }
-      std::cout << std::endl;
-    }
-  }
-
   void print_instruction(Instruction i) {
     std::visit(overloaded{[&](auto x) { std::cout << x.str() << std::endl; }},
                i);
@@ -297,8 +282,4 @@ class Interpreter {
   void clear_screen() const { system("clear"); }
 
   void execute(Instruction i) { std::visit(instruction_executor{*this}, i); }
-
-  bool random_bool() { return rand() % 2; }
-
-  uint8_t random_u8() { return rand() % 256; }
 };

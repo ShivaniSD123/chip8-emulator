@@ -4,11 +4,11 @@
 #include <string>
 
 struct SKP_KEY_NOT_PRESS {
-  int target;
+  int target_register;
 
   std::string str() const {
     std::stringstream ss;
-    ss << "SKP_KEY_NOT_PRESS" << target << "]";
+    ss << "SKP_KEY_NOT_PRESS[" << target_register << "]";
     return ss.str();
   }
 };

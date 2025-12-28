@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -8,7 +9,8 @@ struct CALL_SUB {
 
   std::string str() const {
     std::stringstream ss;
-    ss << "CALL_SUB[" << address << "]";
+    ss << "CALL_SUB[0x" << std::hex << std::setw(4) << std::setfill('0')
+       << address << "]";
     return ss.str();
   }
 };

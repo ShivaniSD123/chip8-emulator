@@ -4,11 +4,11 @@
 #include <string>
 
 struct IND_INC {
-  int target;
+  int target_register;
 
   std::string str() const {
     std::stringstream ss;
-    ss << "IND_REG_INC[" << target << "]";
+    ss << "IND_INC[" << target_register << "]";
     return ss.str();
   }
 };

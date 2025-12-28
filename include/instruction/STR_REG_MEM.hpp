@@ -4,11 +4,11 @@
 #include <string>
 
 struct STR_REG_MEM {
-  int target;
+  int target_register;
 
   std::string str() const {
     std::stringstream ss;
-    ss << "STR_REG_MEM[" << target << "]";
+    ss << "STR_REG_MEM[" << target_register << "]";
     return ss.str();
   }
 };

@@ -14,6 +14,10 @@ void precondition(bool condition,
   }
 }
 
+void precondition_failure(const std::string& msg = "Assertion Failed!") {
+  fatal_error(msg);
+}
+
 template <class... Ts>
 struct overloaded : Ts... {
   using Ts::operator()...;
