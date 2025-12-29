@@ -1,3 +1,4 @@
+#include <chrono>
 #include <fstream>
 #include <iostream>
 
@@ -25,12 +26,18 @@ int main(int argc, char* argv[]) {
   }
   Display d;
   Interpreter vm(parseROM(argv[1]), Font{});
+  auto last_timer = std::chrono::high_resolution_clock::now();
   while (true) {
     if (!d.process_events(vm.keypad)) {
       break;
     }
     for (int i = 0; i < 10; i++) {
+
       vm.step();
+      if ((std::chrono::high_resolution_clock::now() - last_timer) >= 16ms) {
+        vm.tick_timer();
+        last_timer = std::chrono::high_resolution_clock::now();
+      }
     }
     d.draw_screen(vm.video_buffer);
   }

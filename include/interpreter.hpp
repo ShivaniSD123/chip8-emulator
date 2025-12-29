@@ -23,6 +23,7 @@ class Interpreter {
   std::stack<code_pointer> stack;
   std::vector<int> registers;
   code_pointer index_register;
+  int delay_timer;
 
   /// Load ROM file in RAM
   void load_rom() {
@@ -48,7 +49,8 @@ class Interpreter {
         pc({0x200}),
         video_buffer(32, std::vector<int>(64, 0)),
         registers(16, 0),
-        ram(4096) {
+        ram(4096),
+        delay_timer(0) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     load_rom();
     load_font();
@@ -220,7 +222,7 @@ class Interpreter {
     }
 
     void operator()(GET_DELAY_TIMER x) {
-      self.registers[x.target_register] = 0;
+      self.registers[x.target_register] = self.delay_timer;
     }
 
     void operator()(WT_KEY_PRESS x) {
@@ -242,7 +244,9 @@ class Interpreter {
       self.registers[x.target_register] = r & x.mask;
     }
 
-    void operator()(SET_DELAY_TIMER) {}
+    void operator()(SET_DELAY_TIMER x) {
+      self.delay_timer = self.registers[x.target_register];
+    }
 
     void operator()(SET_SOUND_TIMER) {}
 
@@ -260,6 +264,13 @@ class Interpreter {
     advance_program_counter();
     execute(i);
     print_instruction(i);
+  }
+
+  //Tick timer;
+  void tick_timer() {
+    if (delay_timer > 0)
+      delay_timer--;
+    std::cout << "delay timer " << delay_timer << std::endl;
   }
 
  private:
