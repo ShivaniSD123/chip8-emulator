@@ -13,10 +13,12 @@ class Display {
   Key_Map x;
 
  public:
+  bool buzzer_on = false;
+  int square_phase = 0;
+
   Display() : SCALE(10) {
     // Initializing SDL
     SDL_Init(SDL_INIT_VIDEO);
-
     // Creating the window for 32 X 64 screen
     window = SDL_CreateWindow("CHIP-8 Emulator", SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
@@ -67,6 +69,21 @@ class Display {
       }
     }
     return true;
+  }
+
+  void audio_callback(void* userdata, Uint8* stream, int len) {
+    int16_t* buffer = (int16_t*)stream;
+    int samples = len / sizeof(int16_t);
+
+    for (int i = 0; i < samples; i++) {
+      if (buzzer_on) {
+        // simple square wave
+        buffer[i] = (square_phase < 100) ? 3000 : -3000;
+        square_phase = (square_phase + 1) % 200;
+      } else {
+        buffer[i] = 0;  // silence
+      }
+    }
   }
 
   ~Display() {
