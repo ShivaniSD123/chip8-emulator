@@ -33,7 +33,7 @@ This project emulates the original CHIP-8 virtual machine, supporting instructio
 | Stack          | 16 Levels             |
 | Display        | 64 × 32               |
 | Keyboard       | 16 Keys               |
-| Timers         | Delay & Sound (60 Hz) |
+| Timers         | Delay (60 Hz) |
 
 ---
 
@@ -119,13 +119,13 @@ make
 
 ## 📸 Screenshots
 
-### Pong
+### Space Invaders
 
-![Pong Screenshot](screenshots/pong.png)
+![Space Invaders Screenshot](screenshots/SpaceInvaders1.png)
 
 ### IBM Logo
 
-![IBM Logo](screenshots/ibm_logo.png)
+![IBM Logo](screenshots/IBM.png)
 
 ---
 
@@ -137,7 +137,6 @@ make
 * Bitwise Operations
 * SDL2 Graphics Programming
 * Keyboard Event Handling
-* Audio Systems
 * Real-Time Timing
 
 ---
@@ -153,13 +152,6 @@ make
 
 ---
 
-## 📖 References
-
-* Cowgod's CHIP-8 Technical Reference
-* Tobias Langhoff's CHIP-8 Guide
-* SDL2 Documentation
-
----
 
 ## 👨‍💻 Author
 
