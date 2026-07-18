@@ -121,11 +121,11 @@ make
 
 ### Space Invaders
 
-![Space Invaders Screenshot](screenshots/SpaceInvaders1.png)
+![Space Invaders Screenshot](/Users/shivanidwivedi/Desktop/SpaceInvaders1.png)
 
 ### IBM Logo
 
-![IBM Logo](screenshots/IBM.png)
+![IBM Logo](/Users/shivanidwivedi/Desktop/IBM.png)
 
 ---
 
